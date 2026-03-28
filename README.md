@@ -1,2 +1,21 @@
-# applied-ai-security-projects
-Documenting my journey into AI security through practical projects — exploring how AI systems can be attacked, exploited, and secured using real-world techniques and experiments.
+# Applied AI Security Projects
+
+Documenting my security engineering journey across 12 modules — from networking fundamentals to AI-specific attack and defense. Every project is hands-on, built in a real lab environment.
+
+## Structure
+
+| Module | Topic | Status |
+|--------|-------|--------|
+| 01 | Networking · Linux · Threat Mindset | 🟢 In Progress |
+| 02–12 | Coming soon | ⏳ |
+
+## Lab Environment
+
+- **Platform:** Mac M4 · VMware Fusion
+- **Network:** `192.168.100.0/24`
+- **Machines:** Kali (attacker `.10`) · Client (victim `.20`) · Webserver (target `.30`) · Ubuntu Router/Firewall (`.1`)
+
+## Module 01 — Week 1 Highlights
+
+- 10 Python tools: port scanner, network mapper, packet sniffer, recon suite, attack chain simulator
+- Project 11: Full SOC workflow — attack simulation + real-time detection + incident report
