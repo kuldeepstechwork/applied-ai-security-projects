@@ -2,7 +2,7 @@
 """
 banner_grab.py — Protocol-Aware Service Banner Grabber with TLS & CVE Hints
 ============================================================================
-Module 01 · Week 1 · Project 3
+Module 01 · Module 1 · Project 3
 
 What makes this different from a basic banner grabber:
   - 20+ protocol-aware probes: each service gets the exact handshake bytes it

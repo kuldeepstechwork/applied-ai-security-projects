@@ -2,7 +2,7 @@
 """
 net_mapper.py — Subnet Network Mapper with OS Fingerprinting
 =============================================================
-Module 01 · Week 1 · Project 2
+Module 01 · Module 1 · Project 2
 
 What makes this different from a basic mapper:
   - Dual-mode host discovery: ICMP ping first, then TCP connect fallback for

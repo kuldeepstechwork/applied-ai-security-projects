@@ -1,4 +1,4 @@
-# Module 01 — Week 1: Networking · Linux · Threat Mindset
+# Module 01 — Module 1: Networking · Linux · Threat Mindset
 
 ## Overview
 
