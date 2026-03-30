@@ -15,7 +15,7 @@ Documenting my security engineering journey across 12 modules — from networkin
 - **Network:** `192.168.100.0/24`
 - **Machines:** Kali (attacker `.10`) · Client (victim `.20`) · Webserver (target `.30`) · Ubuntu Router/Firewall (`.1`)
 
-## Module 01 — Week 1 Highlights
+## Module 01 — Module 1 Highlights
 
 - 10 Python tools: port scanner, network mapper, packet sniffer, recon suite, attack chain simulator
 - Project 11: Full SOC workflow — attack simulation + real-time detection + incident report

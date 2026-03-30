@@ -2,7 +2,7 @@
 """
 port_scanner.py — Professional Multi-threaded TCP Port Scanner
 ==============================================================
-Module 01 · Week 1 · Project 1
+Module 01 · Module 1 · Project 1
 
 What makes this different from a basic scanner:
   - Protocol-aware probes: sends correct handshake bytes per service (HTTP, SSH,
