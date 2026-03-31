@@ -9,6 +9,17 @@ Documenting my security engineering journey across 12 modules — from networkin
 | 01 | Networking · Linux · Threat Mindset | 🟢 In Progress |
 | 02–12 | Coming soon | ⏳ |
 
+### Module 01 — Projects
+
+| # | Project | Status |
+|---|---------|--------|
+| 01 | Port Scanner | ✅ Done |
+| 02 | Network Mapper | ✅ Done |
+| 03 | Banner Grabber | ✅ Done |
+| 04 | Packet Sniffer | ✅ Done |
+| 05 | Shell Payload Generator | ✅ Done |
+| 06–10 | Coming soon | ⏳ |
+
 ## Lab Environment
 
 - **Platform:** Mac M4 · VMware Fusion
