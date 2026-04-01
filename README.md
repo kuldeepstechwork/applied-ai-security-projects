@@ -18,7 +18,8 @@ Documenting my security engineering journey across 12 modules — from networkin
 | 03 | Banner Grabber | ✅ Done |
 | 04 | Packet Sniffer | ✅ Done |
 | 05 | Shell Payload Generator | ✅ Done |
-| 06–10 | Coming soon | ⏳ |
+| 06 | Credential Auditor | ✅ Done |
+| 07–10 | Coming soon | ⏳ |
 
 ## Lab Environment
 
