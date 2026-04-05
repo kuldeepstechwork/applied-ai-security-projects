@@ -1,40 +1,44 @@
-# Project 01 — Port Scanner
+# Project 01 — Professional TCP Port Scanner
 
-**Multi-threaded TCP port scanner with protocol-aware banner grabbing, version extraction, and JSON export.**
+**Author: Kuldeep Singh**
 
-## What makes this different
+---
 
-Most basic scanners send an HTTP `HEAD` request to every port — which gets you nothing useful from SSH, MySQL, Redis, or FTP. This scanner maintains a **service probe database**: each port gets the correct handshake bytes for its protocol, so you actually get meaningful banners back.
+**High-performance, multi-threaded TCP port scanner with protocol-aware banner grabbing, version extraction, and structured JSON export.**
 
-| Feature | Basic scanner | This scanner |
+## Security Researcher Perspective
+
+In modern offensive security, a basic "is the port open?" check is insufficient. This tool is designed to mimic the reconnaissance phase of a sophisticated actor, focusing on **Service Fingerprinting** and **Protocol Identification** to build an accurate attack surface map.
+
+## Technical Differentiators
+
+| Feature | Standard Scanner | This Scanner |
 |---------|--------------|--------------|
-| Probes | HTTP HEAD to everything | Per-protocol (HTTP, SSH, FTP, SMTP, MySQL, Redis…) |
-| Port syntax | `1-1024` only | `22,80,443` · `1-1024` · `22,80,8000-8090` · `top100` |
-| Version info | Raw banner dump | Regex-parsed clean version string |
-| Progress | None | Live `[========----] 512/1024` bar |
-| Output | Print only | Colour table + optional JSON export |
-| Stats | None | Elapsed time · ports/sec · open ratio |
-| Retry logic | No | Configurable retries for unstable networks |
+| **Probing Logic** | Generic HTTP HEAD | **Per-protocol handshakes** (SSH, FTP, SMTP, MySQL, etc.) |
+| **Port Specification** | Continuous range only | Flexible: `top100`, list (`22,80`), or complex ranges |
+| **Metadata Extraction** | Raw banner dump | **Regex-parsed clean version strings** |
+| **Performance** | Synchronous/Single-threaded | **Highly concurrent** via `queue`-based thread pooling |
+| **Operational Security** | Noisy, predictable | Configurable retries and timeouts for jitter evasion |
 
 ## Usage
 
 ```bash
-# Scan default range 1-1024
+# Reconnaissance: Scan default range 1-1024
 python3 port_scanner.py 192.168.100.30
 
-# Full scan with more threads
+# Full Attribution: 65k scan with high concurrency
 python3 port_scanner.py 192.168.100.30 -p 1-65535 --threads 200
 
-# Mixed port spec + JSON export
-python3 port_scanner.py 192.168.100.30 -p 22,80,443,3306,6379,8080-8090 --json out.json
+# Automated Workflow: Targeted scan with JSON export
+python3 port_scanner.py 192.168.100.30 -p 22,80,443,3306,8080-8090 --json out.json
 
-# Top 100 common ports
+# Speed Recon: Top 100 most common services
 python3 port_scanner.py 192.168.100.30 -p top100
 ```
 
-## Sample output
+## Sample Output
 
-```
+```text
   port_scanner.py  |  target: 192.168.100.30
   ports: 1-1024 (1024 total)  |  threads: 150  |  timeout: 0.5s
 
@@ -53,10 +57,11 @@ python3 port_scanner.py 192.168.100.30 -p top100
   4 open port(s) found out of 1024 probed.
 ```
 
-## Key design decisions
+## Engineering & Design Decisions
 
-- `socket.connect_ex()` returns an error code instead of raising — no exception overhead across thousands of ports
-- `queue.Queue` distributes ports across threads without index slicing or manual locking on the work list
-- Banner grabbing reuses the already-open socket (no second TCP handshake per port)
-- `ScanResult` / `ScanReport` dataclasses make results trivially serialisable to JSON
-- Progress bar runs on the main thread, polling worker liveness — no extra thread needed
+- **Low-Level Socket Optimization**: Utilizes `socket.connect_ex()` to handle connection results via error codes, pathologically reducing exception overhead during mass scans.
+- **Thread Safety**: Implements `queue.Queue` for thread-safe work distribution, ensuring zero-collision port processing without manual locking.
+- **Resource Reuse**: Banner grabbing is performed on the existing open socket, avoiding redundant TCP handshakes and minimizing network noise.
+- **Data Portability**: Leverages `dataclasses` for internal state, enabling direct serialization to JSON for integration with downstream analysis tools (e.g., SIEM, Vulnerability Scanners).
+- **Zero-Wait Progress Monitoring**: The progress bar is managed on the main thread via liveness polling, ensuring accurate real-time feedback without thread starvation.
+

@@ -1,37 +1,42 @@
-# Project 02 — Network Mapper
+# Project 02 — Professional Network Mapper
 
-**Subnet-wide host discovery with dual-mode detection, TTL-based OS fingerprinting, ARP MAC lookup, and per-host port scanning.**
+**Author: Kuldeep Singh**
 
-## What makes this different
+---
 
-A basic mapper does a ping sweep and calls it done — it misses any host that blocks ICMP (most cloud VMs, hardened servers, and firewalled containers do). This mapper adds a **TCP fallback** and then layers on OS fingerprinting and MAC resolution without sending a single extra packet.
+**Subnet-wide host discovery engine with dual-mode detection, TTL-based OS fingerprinting, ARP MAC resolution, and per-host service auditing.**
 
-| Feature | Basic mapper | This mapper |
+## Security Researcher Perspective
+
+Standard "ping sweeps" are trivial to defeat with basic firewall rules. This tool implements a **Defense-Aware Discovery** strategy, layering ICMP probing with TCP fallback to identify "stealth" hosts that reject ICMP but expose common services (HTTP, SSH, etc.). It prioritizes passive information gathering (TTL analysis, ARP cache) to minimize the tool's network footprint.
+
+## Technical Differentiators
+
+| Feature | Standard Mapper | This Mapper |
 |---------|-------------|-------------|
-| Discovery | ICMP ping only | ICMP ping → TCP fallback (ports 80, 443, 22) |
-| OS detection | None | TTL analysis → Linux/macOS · Windows · Cisco |
-| MAC address | None | ARP cache read (zero extra traffic) |
-| Hostname | None | Reverse DNS per live host |
-| Port output | Port numbers | Port number + service name label |
-| Concurrency | Sequential per host | All hosts probed in parallel |
-| Output | Print only | Live per-host output + summary table + JSON |
+| **Discovery Logic** | ICMP Echo only | **ICMP → TCP Fallback** (80, 443, 22) |
+| **OS Attribution** | None | **TTL Signature Analysis** (Linux, Win, Cisco) |
+| **Layer 2 Mapping** | None | **Active ARP Cache Integration** |
+| **Service Labeling** | Port numbers only | **Port + Dynamic Service Resolution** |
+| **Execution Model** | Sequential | **Thread-pooled parallel discovery** |
+| **Operational Impact** | Low visibility | **OPSEC-focused**: Passive MAC resolution |
 
 ## Usage
 
 ```bash
-# Scan default lab network
+# Discovery: Scan internal lab network
 python3 net_mapper.py 192.168.100.0/24
 
-# Different subnet with custom ports + JSON
-python3 net_mapper.py 10.0.0.0/24 -p 22,80,443,3306 --json report.json
+# Asset Inventory: Custom ports + Structured JSON export
+python3 net_mapper.py 10.0.0.0/24 -p 22,80,443,3306 --json inventory.json
 
-# Tune threads and timeout
-python3 net_mapper.py 192.168.100.0/24 --threads 50 --timeout 1.0
+# High Performance: Optimized concurrency for large subnets
+python3 net_mapper.py 172.16.0.0/24 --threads 100 --timeout 1.0
 ```
 
-## Sample output
+## Sample Output
 
-```
+```text
   net_mapper.py  |  network: 192.168.100.0/24
   threads: 100  |  timeout: 0.5s  |  ports/host: 20
 
@@ -46,17 +51,18 @@ python3 net_mapper.py 192.168.100.0/24 --threads 50 --timeout 1.0
        OS hint : Linux / macOS  TTL=64  0.6ms
        Open    : 22/ssh  80/http  3306/mysql  8080/http-alt
 
-  ────────────────────────────────────────
+  ──────────────────────────────────────────────────────────
   SUMMARY — 192.168.100.0/24
   Hosts probed : 254
   Hosts up     : 2
   Elapsed      : 8.3s
 ```
 
-## Key design decisions
+## Engineering & Design Decisions
 
-- Two-stage discovery catches ICMP-blocking hosts that a pure ping sweep misses
-- ARP cache is read **once** before threads start — shared across all workers, zero extra ARP traffic
-- TTL ranges have tolerant bounds (`range(1, 65)` for Linux) to handle multi-hop paths that decrement TTL
-- `threading.Semaphore` caps concurrency so we don't flood small LANs
-- Per-host port scan runs inside the discovery thread — no second pass over live hosts
+- **Multi-Vector Discovery**: Prevents "blind spots" by falling back to TCP service checks if a host suppresses ICMP Echo replies.
+- **Zero-Packet MAC Resolution**: Leverages the system's ARP table to associate hardware addresses with discovered IPs, avoiding redundant Layer 2 broadcasts.
+- **Probabilistic OS Fingerprinting**: Analyzes Time-to-Live (TTL) values from response packets to infer the target operating system stack without intensive fingerprinting scripts.
+- **Resource Management**: Implements `threading.Semaphore` to cap active network connections, preventing socket exhaustion on the host or accidental DoS on fragile network segments.
+- **Unified Pipeline**: Performs discovery, OS inference, and service enumeration in a single pass per host, significantly reducing the total time-to-results.
+
